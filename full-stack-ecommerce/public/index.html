@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jataka Ecommerce Bug Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; margin: 2rem; line-height: 1.5; }
+    h1 { margin-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; max-width: 520px; }
+    label { display: block; margin-top: 0.5rem; }
+    input { padding: 0.25rem 0.5rem; margin-top: 0.25rem; width: 100%; box-sizing: border-box; }
+    button { margin-top: 0.75rem; padding: 0.4rem 0.9rem; cursor: pointer; }
+    .result { margin-top: 0.75rem; font-size: 0.9rem; white-space: pre-wrap; }
+    code { background: #f5f5f5; padding: 0 0.2rem; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Jataka Ecommerce Bug Playground</h1>
+  <p>
+    This page lets you <strong>visually experience</strong> the backend bugs. Fix the code, refresh,
+    and watch the behavior change.
+  </p>
+
+  <div class="card">
+    <h2>Auth Bug (Regex Validator)</h2>
+    <p>
+      Endpoint: <code>POST /api/auth/register</code><br />
+      Try a strong password like <code>Password123!</code>.
+    </p>
+    <label>
+      Username
+      <input id="auth-username" value="juniordev" />
+    </label>
+    <label>
+      Password
+      <input id="auth-password" value="Password123!" />
+    </label>
+    <button id="auth-submit">Send Request</button>
+    <div id="auth-result" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cart Bug 1: calculateTotal</h2>
+    <p>
+      Helper: <code>calculateTotal(price, quantity)</code><br />
+      Try quantity <code>0</code>, <code>"5"</code>, and <code>"five"</code>.
+    </p>
+    <label>
+      Price
+      <input id="cart-price" value="100" />
+    </label>
+    <label>
+      Quantity
+      <input id="cart-quantity" value="five" />
+    </label>
+    <button id="cart-total-submit">Compute Total</button>
+    <div id="cart-total-result" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cart Bug 2: Percentage Discount</h2>
+    <p>
+      Helper: <code>applyPercentageDiscount(subtotal, percent)</code><br />
+      Expected: 10% of 200 is 20, so final should be <code>180</code>.
+    </p>
+    <label>
+      Subtotal
+      <input id="discount-subtotal" value="200" />
+    </label>
+    <label>
+      Percent
+      <input id="discount-percent" value="10" />
+    </label>
+    <button id="discount-submit">Apply Discount</button>
+    <div id="discount-result" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cart Bug 3: Free Shipping Threshold</h2>
+    <p>
+      Helper: <code>isEligibleForFreeShipping(total, threshold)</code><br />
+      Expected: total <code>&gt;=</code> threshold should be eligible.
+    </p>
+    <label>
+      Total
+      <input id="shipping-total" value="500" />
+    </label>
+    <label>
+      Threshold
+      <input id="shipping-threshold" value="500" />
+    </label>
+    <button id="shipping-submit">Check Eligibility</button>
+    <div id="shipping-result" class="result"></div>
+  </div>
+
+  <script>
+    async function postJson(path, body) {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      return { status: res.status, data };
+    }
+
+    // Auth form
+    document.getElementById('auth-submit').addEventListener('click', async () => {
+      const username = document.getElementById('auth-username').value;
+      const password = document.getElementById('auth-password').value;
+      const out = document.getElementById('auth-result');
+
+      out.textContent = 'Loading...';
+      try {
+        const { status, data } = await postJson('/api/auth/register', { username, password });
+        out.textContent = `Status: ${status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        out.textContent = 'Error: ' + err;
+      }
+    });
+
+    // Cart total
+    document.getElementById('cart-total-submit').addEventListener('click', async () => {
+      const priceRaw = document.getElementById('cart-price').value;
+      const qtyRaw = document.getElementById('cart-quantity').value;
+      const out = document.getElementById('cart-total-result');
+
+      const price = Number(priceRaw);
+      const quantity = isNaN(Number(qtyRaw)) ? qtyRaw : Number(qtyRaw);
+
+      out.textContent = 'Loading...';
+      try {
+        const { status, data } = await postJson('/api/cart/total', { price, quantity });
+        out.textContent = `Status: ${status}\nInput: price=${priceRaw}, quantity=${qtyRaw}\nTotal: ${data && data.total}`;
+      } catch (err) {
+        out.textContent = 'Error: ' + err;
+      }
+    });
+
+    // Discount
+    document.getElementById('discount-submit').addEventListener('click', async () => {
+      const subtotalRaw = document.getElementById('discount-subtotal').value;
+      const percentRaw = document.getElementById('discount-percent').value;
+      const subtotal = Number(subtotalRaw);
+      const percent = Number(percentRaw);
+      const out = document.getElementById('discount-result');
+
+      out.textContent = 'Loading...';
+      try {
+        const { status, data } = await postJson('/api/cart/discount', { subtotal, percent });
+        out.textContent = `Status: ${status}\nDiscounted total: ${data && data.discounted}`;
+      } catch (err) {
+        out.textContent = 'Error: ' + err;
+      }
+    });
+
+    // Free shipping
+    document.getElementById('shipping-submit').addEventListener('click', async () => {
+      const totalRaw = document.getElementById('shipping-total').value;
+      const thresholdRaw = document.getElementById('shipping-threshold').value;
+      const total = Number(totalRaw);
+      const threshold = Number(thresholdRaw);
+      const out = document.getElementById('shipping-result');
+
+      out.textContent = 'Loading...';
+      try {
+        const { status, data } = await postJson('/api/cart/free-shipping', { total, threshold });
+        out.textContent = `Status: ${status}\nEligible: ${data && data.eligible}`;
+      } catch (err) {
+        out.textContent = 'Error: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>
