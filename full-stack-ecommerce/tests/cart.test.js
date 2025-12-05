@@ -1,7 +1,8 @@
 const { 
     calculateTotal,
     applyPercentageDiscount,
-    isEligibleForFreeShipping
+    isEligibleForFreeShipping,
+    calculateTotalWithTax
 } = require('../src/utils/cartHelper');
 
 describe('Cart Helper - calculateTotal', () => {
@@ -38,5 +39,14 @@ describe('Cart Helper - discounts and shipping', () => {
     it('should not be eligible when below the free shipping threshold', () => {
         const eligible = isEligibleForFreeShipping(400, 500);
         expect(eligible).toBe(false);
+    });
+});
+
+describe('Cart Helper - total with tax', () => {
+    it('should apply tax only on subtotal, not shipping', () => {
+        // subtotal=100, shipping=20, taxRate=0.1
+        // Expected: 100 + 20 + (100 * 0.1) = 130
+        const total = calculateTotalWithTax(100, 20, 0.1);
+        expect(total).toBe(130);
     });
 });

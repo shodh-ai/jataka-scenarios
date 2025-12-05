@@ -26,4 +26,10 @@ router.post('/cart/free-shipping', (req, res) => {
     res.json({ eligible });
 });
 
+router.post('/cart/total-with-tax', (req, res) => {
+    const { subtotal, shipping, taxRate } = req.body;
+    const total = cartHelper.calculateTotalWithTax(subtotal, shipping, taxRate);
+    res.json({ total });
+});
+
 module.exports = router;

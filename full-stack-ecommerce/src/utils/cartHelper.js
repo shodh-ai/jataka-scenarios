@@ -24,3 +24,13 @@ exports.isEligibleForFreeShipping = (total, threshold) => {
     // BUG: This excludes the exact threshold value.
     return total > threshold;
 };
+
+// TICKET 2.3 BUG: Tax is applied to the wrong amount.
+// Expected: tax should be applied only on subtotal, not subtotal + shipping.
+exports.calculateTotalWithTax = (subtotal, shipping, taxRate) => {
+    if (subtotal < 0 || shipping < 0) return 0;
+    // BUG: applies tax to subtotal + shipping instead of subtotal only.
+    const taxable = subtotal + shipping;
+    const tax = taxable * taxRate;
+    return taxable + tax;
+};
