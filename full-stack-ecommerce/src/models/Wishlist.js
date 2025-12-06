@@ -8,9 +8,15 @@
 const mongoose = require('mongoose');
 
 const WishlistSchema = new mongoose.Schema({
-    // Student needs to fill this in:
-    // user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    // products: [{ type: String }] // Store Product IDs as strings for simplicity in this demo
-});
+    user: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
+    products: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Product' 
+    }]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Wishlist', WishlistSchema);

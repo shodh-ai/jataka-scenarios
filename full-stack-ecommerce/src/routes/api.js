@@ -1,11 +1,24 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const cartHelper = require('../utils/cartHelper');
+const productController = require('../controllers/productController');
+const cartController = require('../controllers/cartController');
+const orderController = require('../controllers/orderController');
+const wishlistController = require('../controllers/wishlistController');
 
 const router = express.Router();
 
 // Auth routes
 router.post('/auth/register', authController.register);
+router.post('/auth/login', authController.login);
+
+// Product routes (Master Build)
+router.get('/products', productController.getAllProducts);
+
+// Cart routes (Master Build)
+router.post('/cart/add', cartController.addToCart);
+router.post('/cart/move-to-wishlist', wishlistController.moveToWishlist);
+router.get('/cart/:userId', cartController.getCart);
 
 // Cart demo routes (intentionally reflect current buggy behavior)
 router.post('/cart/total', (req, res) => {
@@ -31,5 +44,11 @@ router.post('/cart/total-with-tax', (req, res) => {
     const total = cartHelper.calculateTotalWithTax(subtotal, shipping, taxRate);
     res.json({ total });
 });
+
+// Order routes (Master Build)
+router.post('/orders', orderController.createOrder);
+
+// Wishlist routes (Master Build)
+router.get('/wishlist/:userId', wishlistController.getWishlist);
 
 module.exports = router;

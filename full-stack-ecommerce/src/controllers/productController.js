@@ -1,33 +1,33 @@
 const Product = require('../models/Product');
+const RedisService = require('../services/RedisService'); // You need to create this file
 
 exports.getAllProducts = async (req, res) => {
     try {
-        // TICKET 3.1: Performance optimization needed.
-        // Currently, this fetches ALL products. If we have 10,000 items, the server crashes.
-        // STUDENT TASK: Implement Pagination (skip/limit) and Redis Caching.
+        const { category, search, page = 1, limit = 10 } = req.query;
+        const cacheKey = `products:${category}:${search}:${page}:${limit}`;
 
-        const { category, search } = req.query;
+        // MASTER BUILD: Redis Caching Pattern
+        const data = await RedisService.getOrSet(cacheKey, async () => {
+            let query = { isDeleted: false };
+            if(category) query.category = category;
+            if(search) query.name = { $regex: search, $options: 'i' };
 
-        let query = { isDeleted: false };
-        if (category) query.category = category;
-
-        // BUG: Inefficient Search
-        // Using Regex without an index is slow on large datasets.
-        if (search) {
-            query.name = { $regex: search, $options: 'i' };
-        }
-
-        // BIGGER BUG: No Limit. Fetches everything.
-        const products = await Product.find(query);
-
-        // ARTIFICIAL LATENCY (Simulating a slow DB query for the demo)
-        // Student must remove this or fix it via caching
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        res.json({
-            count: products.length,
-            data: products
+            // MASTER BUILD: Pagination
+            const products = await Product.find(query)
+                .limit(limit * 1)
+                .skip((page - 1) * limit)
+                .exec();
+            
+            const count = await Product.countDocuments(query);
+            
+            return {
+                products,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page
+            };
         });
+
+        res.json(data);
     } catch (error) {
         res.status(500).json({ error: "Server Error" });
     }

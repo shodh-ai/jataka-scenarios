@@ -4,6 +4,13 @@ import { ShoppingBag, Search, Menu } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
+    const token = localStorage.getItem('token');
+
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.href = '/login';
+    };
+
     return (
         <nav className="navbar">
             <div className="container navbar-container">
@@ -12,9 +19,19 @@ const Navbar = () => {
                 </Link>
 
                 <div className="nav-links">
-                    <Link to="/" className="nav-link">Home</Link>
                     <Link to="/products" className="nav-link">Shop</Link>
-                    <Link to="/about" className="nav-link">Our Story</Link>
+                    {token ? (
+                        <>
+                            <Link to="/wishlist" className="nav-link">Wishlist</Link>
+                            <Link to="/cart" className="nav-link">Cart</Link>
+                            <button onClick={handleLogout} className="nav-link icon-btn">Logout</button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="nav-link">Login</Link>
+                            <Link to="/register" className="nav-link">Register</Link>
+                        </>
+                    )}
                 </div>
 
                 <div className="nav-actions">

@@ -4,30 +4,15 @@ const User = require('../models/User');
 const auth = async (req, res, next) => {
     try {
         const header = req.header('Authorization');
-
-        // LEGACY BYPASS: Devs added this for testing and forgot to remove it.
-        // SECURITY RISK: Anyone sending this header becomes admin.
-        if (req.header('X-Bypass-Auth') === 'dev-secret-key-123') {
-            req.user = { _id: 'admin_id', role: 'admin' };
-            return next();
-        }
-
-        if (!header) {
-            throw new Error();
-        }
+        if (!header) throw new Error();
 
         const token = header.replace('Bearer ', '');
-
-        // BUG: In 'dev' mode, we sometimes skip verification? 
-        // Student must fix this logic to ALWAYS verify.
-        const decoded = jwt.decode(token); // DECODE IS NOT VERIFY! 
-        // Correct way: jwt.verify(token, process.env.JWT_SECRET)
-
-        const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
-
-        if (!user) {
-            throw new Error();
-        }
+        
+        // MASTER BUILD: Actual Verification
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        const user = await User.findOne({ _id: decoded._id });
+        if (!user) throw new Error();
 
         req.token = token;
         req.user = user;
@@ -37,10 +22,11 @@ const auth = async (req, res, next) => {
     }
 };
 
-// Placeholder for Role Middleware (Student must implement this)
 const checkRole = (roles) => {
     return (req, res, next) => {
-        // TODO: Implement RBAC here
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ error: "Access Denied" });
+        }
         next();
     }
 };

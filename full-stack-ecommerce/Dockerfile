@@ -1,8 +1,18 @@
-# Dockerfile
-# TICKET 5.1: Containerize the application
-# Requirements:
-# 1. Use Node 20
-# 2. Expose Port 5000
-# 3. Run npm start
+FROM node:20-alpine
 
-# STUDENT TO FILL THIS IN
+WORKDIR /app
+
+# Copy package files first to leverage Docker layer cache
+COPY package*.json ./
+
+# Install only production dependencies for speed/security
+RUN npm install --only=production
+
+# Copy the rest of the source code
+COPY . .
+
+# Expose the API port
+EXPOSE 5000
+
+# Start the application
+CMD ["npm", "start"]

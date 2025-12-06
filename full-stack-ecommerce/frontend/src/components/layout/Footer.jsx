@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -16,27 +17,27 @@ const Footer = () => {
                     <div className="footer-section">
                         <h4>Shop</h4>
                         <ul>
-                            <li><a href="#">All Products</a></li>
-                            <li><a href="#">New Arrivals</a></li>
-                            <li><a href="#">Accessories</a></li>
+                            <li><Link to="/products">All Products</Link></li>
+                            <li><Link to="/new-arrivals">New Arrivals</Link></li>
+                            <li><Link to="/accessories">Accessories</Link></li>
                         </ul>
                     </div>
 
                     <div className="footer-section">
                         <h4>Support</h4>
                         <ul>
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Shipping & Returns</a></li>
-                            <li><a href="#">Contact Us</a></li>
+                            <li><Link to="/faq">FAQ</Link></li>
+                            <li><Link to="/shipping-returns">Shipping & Returns</Link></li>
+                            <li><Link to="/contact">Contact Us</Link></li>
                         </ul>
                     </div>
 
                     <div className="footer-section">
                         <h4>Connect</h4>
                         <ul>
-                            <li><a href="#">Instagram</a></li>
-                            <li><a href="#">Twitter</a></li>
-                            <li><a href="#">Pinterest</a></li>
+                            <li><Link to="/instagram">Instagram</Link></li>
+                            <li><Link to="/twitter">Twitter</Link></li>
+                            <li><Link to="/pinterest">Pinterest</Link></li>
                         </ul>
                     </div>
                 </div>
