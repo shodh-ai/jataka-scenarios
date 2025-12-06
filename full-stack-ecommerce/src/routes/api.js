@@ -4,7 +4,6 @@ const cartHelper = require('../utils/cartHelper');
 const productController = require('../controllers/productController');
 const cartController = require('../controllers/cartController');
 const orderController = require('../controllers/orderController');
-const wishlistController = require('../controllers/wishlistController');
 
 const router = express.Router();
 
@@ -17,7 +16,6 @@ router.get('/products', productController.getAllProducts);
 
 // Cart routes (Master Build)
 router.post('/cart/add', cartController.addToCart);
-router.post('/cart/move-to-wishlist', wishlistController.moveToWishlist);
 router.get('/cart/:userId', cartController.getCart);
 
 // Cart demo routes (intentionally reflect current buggy behavior)
@@ -47,8 +45,5 @@ router.post('/cart/total-with-tax', (req, res) => {
 
 // Order routes (Master Build)
 router.post('/orders', orderController.createOrder);
-
-// Wishlist routes (Master Build)
-router.get('/wishlist/:userId', wishlistController.getWishlist);
 
 module.exports = router;

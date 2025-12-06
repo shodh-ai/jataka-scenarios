@@ -11,18 +11,6 @@ const Cart = () => {
             .then(data => setCart(data));
     }, []);
 
-    const moveToWishlist = async (productId) => {
-        const res = await fetch(`${API_BASE_URL}/cart/move-to-wishlist`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ userId, productId })
-        });
-        if (res.ok) {
-            alert('Moved to Wishlist!');
-            window.location.reload(); // Lazy refresh
-        }
-    };
-
     if (!cart) return <div>Loading...</div>;
 
     return (
@@ -34,9 +22,6 @@ const Cart = () => {
                         <h3>{item.productId.name}</h3>
                         <p>Qty: {item.quantity} | ${item.price}</p>
                     </div>
-                    <button onClick={() => moveToWishlist(item.productId._id)}>
-                        Save for Later
-                    </button>
                 </div>
             ))}
         </div>
