@@ -5,8 +5,8 @@ exports.register = async (req, res) => {
     try {
         const { username, password, email } = req.body;
 
-        // MASTER BUILD: Secure Regex
-        const passwordRegex = /^[a-zA-Z0-9!@#$%^&*]{8,}$/;
+        // LEVEL 1: Broken legacy regex
+        const passwordRegex = /^[a-z]+$/;
 
         if (!passwordRegex.test(password)) {
             return res.status(400).json({ 

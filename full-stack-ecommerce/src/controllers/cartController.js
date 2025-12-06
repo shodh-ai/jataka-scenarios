@@ -11,44 +11,39 @@
 
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const TaxService = require('../services/TaxService'); // You need to create this file
 
-// MASTER BUILD: Atomic add-to-cart
+// LEVEL 1: Legacy, non-atomic add-to-cart with hardcoded tax and race conditions
 exports.addToCart = async (req, res) => {
     try {
         const { userId, productId, quantity } = req.body;
 
-        // MASTER BUILD: Atomic Stock Check & Update
-        // This prevents the Race Condition
-        const product = await Product.findOneAndUpdate(
-            { _id: productId, stock: { $gte: quantity } },
-            { $inc: { stock: -quantity } },
-            { new: true }
-        );
-
+        // No atomic stock check, no validation – classic legacy bug
+        const product = await Product.findById(productId);
         if (!product) {
-            return res.status(400).json({ error: "Insufficient stock" });
+            return res.status(404).json({ error: 'Product not found' });
         }
 
-        // MASTER BUILD: Logic delegated to Service
+        // Hardcoded 20% tax regardless of user/location
+        const priceWithTax = product.price * 1.2;
+
         let cart = await Cart.findOne({ user: userId });
-        if (!cart) cart = await Cart.create({ user: userId, items: [] });
-
-        const priceWithTax = await TaxService.calculatePrice(userId, product.price);
-
-        const itemIndex = cart.items.findIndex(p => p.productId == productId);
-        if (itemIndex > -1) {
-            cart.items[itemIndex].quantity += quantity;
-        } else {
-            cart.items.push({ productId, quantity, price: priceWithTax });
+        if (!cart) {
+            cart = await Cart.create({ user: userId, items: [] });
         }
-        
-        await cart.save();
-        res.status(200).json({ success: true, cart });
 
+        const existing = cart.items.find(i => String(i.productId) === String(productId));
+        if (existing) {
+            // Blind increment, no stock check
+            existing.quantity = (existing.quantity || 0) + (quantity || 1);
+        } else {
+            cart.items.push({ productId, quantity: quantity || 1, price: priceWithTax });
+        }
+
+        await cart.save();
+        res.json({ success: true, cart });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Server Error" });
+        res.status(500).json({ error: 'Server Error' });
     }
 };
 
