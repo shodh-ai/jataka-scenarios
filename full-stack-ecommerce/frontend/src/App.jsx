@@ -4,7 +4,6 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
 import ProductList from './pages/ProductList';
-import Wishlist from './pages/Wishlist';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -27,7 +26,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<ProductList />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/new-arrivals" element={<NewArrivals />} />
